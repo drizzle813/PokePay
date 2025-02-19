@@ -1,17 +1,17 @@
-const mongoose = require('mongoose');
-const express = require('express');
-const cors = require('cors'); // Add CORS for safety
+const mongoose = require("mongoose");
+const express = require("express");
+const cors = require("cors"); // Allow cross-origin requests
 const app = express();
 
-// Middleware
-app.use(express.json()); 
-app.use(cors()); // Allow cross-origin requests
+app.use(express.json());
+app.use(cors()); // Enables frontend apps to access the backend
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/PokePay', {
+mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/PokePay", {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => console.log('✅ MongoDB connected')).catch(err => console.error('❌ MongoDB connection error:', err));
+}).then(() => console.log("✅ MongoDB connected"))
+.catch(err => console.error("❌ MongoDB connection error:", err));
 
 // Define Auction Schema
 const auctionSchema = new mongoose.Schema({
@@ -24,19 +24,18 @@ const auctionSchema = new mongoose.Schema({
         userId: { type: String, default: null }
     },
     endTime: { type: Date, required: true },
-    status: { type: String, default: 'active' }
+    status: { type: String, default: "active" }
 });
 
-// Create Auction Model
-const Auction = mongoose.model('Auction', auctionSchema);
+const Auction = mongoose.model("Auction", auctionSchema);
 
-// Test route
-app.get('/', (req, res) => {
-    res.send('PokePay server is running!');
+// ✅ Root Test Route
+app.get("/", (req, res) => {
+    res.send("PokePay server is running!");
 });
 
-// ✅ **GET Auctions Endpoint**
-app.get('/api/nfts/auctions', async (req, res) => {
+// ✅ GET Auctions Route (Fixes `Cannot GET` error)
+app.get("/api/nfts/auctions", async (req, res) => {
     try {
         const auctions = await Auction.find();
         res.json(auctions);
@@ -45,8 +44,8 @@ app.get('/api/nfts/auctions', async (req, res) => {
     }
 });
 
-// ✅ **POST Auctions Endpoint**
-app.post('/api/nfts/auctions', async (req, res) => {
+// ✅ POST Auction Route
+app.post("/api/nfts/auctions", async (req, res) => {
     try {
         const newAuction = new Auction(req.body);
         await newAuction.save();
@@ -56,8 +55,8 @@ app.post('/api/nfts/auctions', async (req, res) => {
     }
 });
 
-// Start the server
-const PORT = 4000;
+// Start Server
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
 });
